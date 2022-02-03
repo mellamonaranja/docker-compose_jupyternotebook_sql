@@ -1,0 +1,42 @@
+version: '3.1'
+
+services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: jh
+      MYSQL_DATABASE: DB_SQLSTK
+    volumes: 
+      - ./DB_SQLSTK_FULL_FOR_BOOK_20210521.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - 3306:3306 
+    networks:
+      - sql
+
+  jupyter:
+    build:
+      context: .
+    ports:
+      - 8888:8888
+    volumes:
+      - ./result:/usr/app/result
+      - ./src:/usr/app/src
+    networks:
+      - sql
+    environment:
+      - SQL_HOST=db
+      - SQL_PORT=3306
+      - SQL_USER=root
+      - SQL_PASSWORD=jh
+      - SQL_DATABASE=DB_SQLSTK
+      
+  adminer: ## Web app that connects to sql database
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - sql
+
+networks:
+  sql:
